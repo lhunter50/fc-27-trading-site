@@ -1,5 +1,6 @@
 import sqlite3
 from datetime import datetime, timezone
+import time
 
 from app.database import (
     DATABASE,
@@ -48,5 +49,13 @@ def collect_futgg_prices():
     print(f"Price observations saved: {saved_prices:,}")
 
 
+def run_collector_loop(interval_seconds):
+    while True:
+        try:
+            collect_futgg_prices()
+        except Exception as e:
+            print(f"Error during collection: {e}")
+        time.sleep(interval_seconds)
+
 if __name__ == "__main__":
-    collect_futgg_prices()
+    run_collector_loop(interval_seconds=900)
