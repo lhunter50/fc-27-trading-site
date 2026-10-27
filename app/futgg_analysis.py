@@ -1,10 +1,15 @@
 import sqlite3
 
+from datetime import datetime, timedelta, timezone
 from app.database import DATABASE
 from app.trading import calculate_profit, calculate_roi
 
 
-def scan_futgg_market(min_observations=2):
+def scan_futgg_market(min_observations=2, max_age_minutes=60):
+    cutoff = (
+        datetime.now(timezone.utc)
+        - timedelta(minutes=max_age_minutes)
+    ).isoformat()
     with sqlite3.connect(DATABASE) as conn:
         conn.row_factory = sqlite3.Row
 
@@ -26,14 +31,15 @@ def scan_futgg_market(min_observations=2):
             FROM futgg_players p
             JOIN futgg_price_history h
                 ON h.player_id = p.ea_id
+            WHERE p.last_seen_at >= ?
             GROUP BY p.ea_id
             HAVING COUNT(h.id) >= ?
-        """, (min_observations,)).fetchall()
+        """, (cutoff, min_observations)).fetchall()
 
     return [dict(row) for row in rows]
 
 
-def find_futgg_opportunities(min_observations=2):
+def find_futgg_opportunities(min_observations=3):
     players = scan_futgg_market(min_observations)
     opportunities = []
 

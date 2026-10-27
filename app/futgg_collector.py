@@ -7,12 +7,15 @@ from app.database import (
     initialize_futgg_tables,
     save_futgg_players,
     save_futgg_prices,
+    initialize_futgg_freshness,
+    update_futgg_last_seen,
 )
 from app.futgg_market import fetch_futgg_market
 
 
 def collect_futgg_prices():
     initialize_futgg_tables()
+    initialize_futgg_freshness()
 
     players = fetch_futgg_market()
 
@@ -42,6 +45,7 @@ def collect_futgg_prices():
     recorded_at = datetime.now(timezone.utc).isoformat()
 
     save_futgg_players(players)
+    update_futgg_last_seen(players, recorded_at)
     saved_prices = save_futgg_prices(changed_players, recorded_at)
 
     print(f"Players received: {len(players):,}")

@@ -7,11 +7,12 @@ from app.futgg_analysis import (
 def main():
     players = scan_futgg_market(min_observations=1)
     eligible = scan_futgg_market(min_observations=2)
-    opportunities = find_futgg_opportunities()
+    opportunities = find_futgg_opportunities(min_observations=3)
 
     print(f"Players analyzed: {len(players):,}")
     print(f"Players with 2+ observations: {len(eligible):,}")
     print(f"Profitable opportunities: {len(opportunities):,}")
+    print(len(scan_futgg_market(min_observations=3)))
 
     print("\nSample players:")
 
