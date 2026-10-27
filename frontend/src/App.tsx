@@ -1,10 +1,20 @@
 import { DashboardLayout } from './components/layout/DashboardLayout'
 import { MarketSummary } from './components/market/MarketSummary'
+import { PlayerFilters } from './components/market/PlayerFilters'
 import { PlayerTable } from './components/market/PlayerTable'
 import { usePlayers } from './hooks/usePlayers'
+import { useMarketFilters } from './hooks/useMarketFilters'
 
 function App() {
   const { players, loading, error } = usePlayers()
+
+  const {
+    search,
+    setSearch,
+    category,
+    setCategory,
+    filteredPlayers,
+  } = useMarketFilters(players)
 
   return (
     <DashboardLayout>
@@ -28,7 +38,21 @@ function App() {
       {!loading && !error && (
         <div className="space-y-8">
           <MarketSummary players={players} />
-          <PlayerTable players={players} />
+
+          <section className="space-y-4">
+            <PlayerFilters
+              search={search}
+              category={category}
+              onSearchChange={setSearch}
+              onCategoryChange={setCategory}
+            />
+
+            <p className="text-sm text-slate-400">
+              Showing {filteredPlayers.length} of {players.length} players
+            </p>
+
+            <PlayerTable players={filteredPlayers} />
+          </section>
         </div>
       )}
     </DashboardLayout>
