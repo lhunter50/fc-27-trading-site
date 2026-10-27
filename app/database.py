@@ -48,6 +48,28 @@ def initialize_futgg_tables():
             ON futgg_price_history(player_id, recorded_at)
         """)
 
+def initialize_futgg_freshness():
+    with sqlite3.connect(DATABASE) as conn:
+        columns = {
+            row[1]
+            for row in conn.execute("PRAGMA table_info(futgg_players)")
+        }
+        if "last_seen_at" not in columns:
+            conn.execute("""
+                ALTER TABLE futgg_players
+                ADD COLUMN last_seen_at TEXT
+            """)
+
+def update_futgg_last_seen(players, recorded_at):
+    player_ids = [player["eaId"] for player in players]
+
+    with sqlite3.connect(DATABASE) as conn:
+        conn.executemany("""
+            UPDATE futgg_players
+            SET last_seen_at = ?
+            WHERE ea_id = ?
+        """, [(recorded_at, player_id) for player_id in player_ids])
+
 def save_futgg_players(players):
     saved = 0
 
