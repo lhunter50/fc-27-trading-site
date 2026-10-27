@@ -1,9 +1,11 @@
 import { OpportunityTable } from '../components/investments/OpportunityTable'
 import { useOpportunities } from '../hooks/useOpportunities'
+import { ScannerSummary } from '../components/investments/ScannerSummary'
+import { useScannerSummary } from '../hooks/useScannerSummary'
 
 export function InvestmentsPage() {
   const { opportunities, loading, error } = useOpportunities()
-
+  const { summary, loading: scannerLoading, error: scannerError } = useScannerSummary()
   return (
     <div className="space-y-8">
       <div>
@@ -16,21 +18,20 @@ export function InvestmentsPage() {
         </p>
       </div>
 
+      {scannerLoading && <p>Scanning market opportunities...</p>}
+
+      {scannerError && <p className="text-red-400">Error: {scannerError}</p>}
+
+      {!scannerLoading && !scannerError && summary && (
+        <ScannerSummary summary={summary} />
+      )}
+
       {loading && <p>Scanning market opportunities...</p>}
 
       {error && <p className="text-red-400">Error: {error}</p>}
 
       {!loading && !error && (
         <>
-          <div className="rounded-xl border border-slate-800 bg-slate-900 p-6">
-            <p className="text-sm text-slate-400">
-              Potential Opportunities
-            </p>
-
-            <p className="mt-2 text-3xl font-bold text-white">
-              {opportunities.length}
-            </p>
-          </div>
 
           <OpportunityTable opportunities={opportunities} />
 

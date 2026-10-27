@@ -3,6 +3,7 @@ from fastapi import FastAPI, Query
 from app.analysis import scan_market
 from app.scanner import find_investment_opportunities, get_scanner_summary
 
+
 app = FastAPI(
      title="FIFA Trading Bot API",
      description="API for analyzing FIFA player prices and identifying investment opportunities.",
