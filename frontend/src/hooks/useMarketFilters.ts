@@ -1,12 +1,26 @@
 import { useMemo, useState } from 'react'
 import type { Player } from '../types/player'
 
+type SortKey = 'name' | 'current_price' | 'average_price' | 'price_change'
+type SortDirection = 'asc' | 'desc'
+
 export function useMarketFilters(players: Player[]) {
   const [search, setSearch] = useState('')
   const [category, setCategory] = useState('all')
+  const [sortKey, setSortKey] = useState<SortKey>('current_price')
+  const [sortDirection, setSortDirection] = useState<SortDirection>('asc')
+
+  function toggleSort(key: SortKey) {
+    if (key === sortKey) {
+      setSortDirection((current) => current === 'asc' ? 'desc' : 'asc')
+    } else {
+      setSortKey(key)
+      setSortDirection(key === 'name' ? 'asc' : 'desc')
+    }
+  }
 
   const filteredPlayers = useMemo(() => {
-    return players.filter((player) => {
+    const filtered = players.filter((player) => {
       const matchesSearch = player.name
         .toLowerCase()
         .includes(search.trim().toLowerCase())
@@ -16,7 +30,24 @@ export function useMarketFilters(players: Player[]) {
 
       return matchesSearch && matchesCategory
     })
-  }, [players, search, category])
+
+    return filtered.sort((a, b) => {
+      if (sortKey === 'name') {
+        const comparison = a.name.localeCompare(b.name)
+        return sortDirection === 'asc' ? comparison : -comparison
+      }
+
+      const aValue = a[sortKey]
+      const bValue = b[sortKey]
+
+      if (aValue === null) return 1
+      if (bValue === null) return -1
+
+      return sortDirection === 'asc'
+        ? aValue - bValue
+        : bValue - aValue
+    })
+  }, [players, search, category, sortKey, sortDirection])
 
   return {
     search,
@@ -24,5 +55,8 @@ export function useMarketFilters(players: Player[]) {
     category,
     setCategory,
     filteredPlayers,
+    sortKey,
+    sortDirection,
+    toggleSort,
   }
 }

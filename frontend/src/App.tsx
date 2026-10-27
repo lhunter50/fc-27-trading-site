@@ -7,13 +7,15 @@ import { useMarketFilters } from './hooks/useMarketFilters'
 
 function App() {
   const { players, loading, error } = usePlayers()
-
   const {
     search,
     setSearch,
     category,
     setCategory,
     filteredPlayers,
+    sortKey,
+    sortDirection,
+    toggleSort,
   } = useMarketFilters(players)
 
   return (
@@ -51,7 +53,12 @@ function App() {
               Showing {filteredPlayers.length} of {players.length} players
             </p>
 
-            <PlayerTable players={filteredPlayers} />
+            <PlayerTable 
+              players={filteredPlayers} 
+              sortKey={sortKey}
+              sortDirection={sortDirection}
+              onSort={toggleSort}
+            />
           </section>
         </div>
       )}
