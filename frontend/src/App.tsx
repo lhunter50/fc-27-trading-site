@@ -1,20 +1,37 @@
-import { PlayerTable } from './components/PlayerTable'
+import { DashboardLayout } from './components/layout/DashboardLayout'
+import { MarketSummary } from './components/market/MarketSummary'
+import { PlayerTable } from './components/market/PlayerTable'
 import { usePlayers } from './hooks/usePlayers'
-import './App.css'
 
 function App() {
   const { players, loading, error } = usePlayers()
 
-  if (loading) return <p>Loading market data...</p>
-  if (error) return <p>Error: {error}</p>
-
   return (
-    <main>
-      <h1>FC 27 Trading Scanner</h1>
-      <p>Tracking {players.length} affordable players</p>
+    <DashboardLayout>
+      <div className="mb-8">
+        <h2 className="text-3xl font-bold text-white">
+          Market Overview
+        </h2>
+        <p className="mt-2 text-slate-400">
+          Monitor player prices and discover trading opportunities.
+        </p>
+      </div>
 
-      <PlayerTable players={players} />
-    </main>
+      {loading && <p>Loading market data...</p>}
+
+      {error && (
+        <p className="text-red-400">
+          Error: {error}
+        </p>
+      )}
+
+      {!loading && !error && (
+        <div className="space-y-8">
+          <MarketSummary players={players} />
+          <PlayerTable players={players} />
+        </div>
+      )}
+    </DashboardLayout>
   )
 }
 
