@@ -21,6 +21,94 @@ def initialize_database():
         """)
 
 
+def initialize_futgg_tables():
+    with sqlite3.connect(DATABASE) as conn:
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS futgg_players (
+                ea_id INTEGER PRIMARY KEY,
+                name TEXT NOT NULL,
+                rating INTEGER,
+                category TEXT,
+                image_url TEXT
+            )
+        """)
+
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS futgg_price_history (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                player_id INTEGER NOT NULL,
+                price INTEGER NOT NULL,
+                recorded_at TEXT NOT NULL,
+                UNIQUE(player_id, recorded_at)
+            )
+        """)
+
+        conn.execute("""
+            CREATE INDEX IF NOT EXISTS idx_futgg_history_player_time
+            ON futgg_price_history(player_id, recorded_at)
+        """)
+
+def save_futgg_players(players):
+    saved = 0
+
+    with sqlite3.connect(DATABASE) as conn:
+        for player in players:
+            cursor = conn.execute("""
+                INSERT INTO futgg_players (
+                    ea_id, name, rating, category, image_url
+                )
+                VALUES (?, ?, ?, ?, ?)
+                ON CONFLICT(ea_id) DO UPDATE SET
+                    name = excluded.name,
+                    rating = excluded.rating,
+                    category = excluded.category,
+                    image_url = COALESCE(
+                        excluded.image_url,
+                        futgg_players.image_url
+                    )
+            """, (
+                player["eaId"],
+                player["name"],
+                player.get("rating"),
+                player.get("category"),
+                player.get("image")
+            ))
+
+            saved += cursor.rowcount
+
+    return saved
+
+
+def save_futgg_prices(players, recorded_at):
+    saved = 0
+
+    with sqlite3.connect(DATABASE) as conn:
+        for player in players:
+            player_id = player.get("eaId")
+            price = player.get("price")
+
+            if (
+                not isinstance(player_id, int)
+                or not isinstance(price, int)
+                or price <= 0
+            ):
+                continue
+
+            cursor = conn.execute("""
+                INSERT OR IGNORE INTO futgg_price_history (
+                    player_id, price, recorded_at
+                )
+                VALUES (?, ?, ?)
+            """, (
+                player_id,
+                price,
+                recorded_at
+            ))
+
+            saved += cursor.rowcount
+
+    return saved
+
 def save_prices(players, recorded_at):
     saved = 0
 
