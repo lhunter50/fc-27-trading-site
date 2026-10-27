@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Query
 
 from app.analysis import scan_market
-from app.scanner import find_investment_opportunities
+from app.scanner import find_investment_opportunities, get_scanner_summary
 
 app = FastAPI(
      title="FIFA Trading Bot API",
@@ -51,3 +51,6 @@ def get_opportunities(
         "opportunities": opportunities[:limit]
     }
 
+@app.get("/api/scanner/summary")
+def scanner_summary():
+    return get_scanner_summary()

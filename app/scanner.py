@@ -69,3 +69,37 @@ def find_investment_opportunities(min_observations=2):
         key=lambda player: player["roi"],
         reverse=True
     )
+
+def get_scanner_summary(min_observations=2):
+    players = scan_market(min_observations=min_observations)
+
+    below_average = 0
+    rejected_after_tax = 0
+    profitable_opportunities = 0
+
+    for player in players:
+        current_price = player["current_price"]
+        average_price = player["average_price"]
+
+        if current_price >= average_price:
+            continue
+
+        below_average += 1
+
+        potential_profit = calculate_profit(
+            current_price,
+            average_price
+        )
+
+        if potential_profit <= 0:
+            rejected_after_tax += 1
+
+        else:
+            profitable_opportunities += 1
+
+    return {
+        "players_analyzed": len(players),
+        "below_average": below_average,
+        "rejected_after_tax": rejected_after_tax,
+        "profitable_opportunities": profitable_opportunities
+    }
