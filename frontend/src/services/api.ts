@@ -20,14 +20,20 @@ export async function fetchPlayers(
     return response.json()
 }
 
-export async function fetchOpportunities(): Promise<OpportunityResponse> {
-    const response = await fetch("/api/opportunities")
+export async function fetchOpportunities(
+  source: MarketSource = "original"
+): Promise<OpportunityResponse> {
+  const endpoint = source === "futgg"
+    ? "/api/futgg/opportunities"
+    : "/api/opportunities"
 
-    if (!response.ok) {
-        throw new Error(`Failed to fetch opportunities: ${response.status}`)
-    }
+  const response = await fetch(endpoint)
 
-    return response.json()
+  if (!response.ok) {
+    throw new Error(`Failed to fetch opportunities: ${response.status}`)
+  }
+
+  return response.json()
 }
 
 export async function fetchScannerSummary(): Promise<ScannerSummary> {
