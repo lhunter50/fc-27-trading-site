@@ -103,6 +103,6 @@ def get_fut_gg_summary():
 
     return{
         "players_analyzed": len(players),
-        "players_elibible": len(eligible),
-        "profitiable_opportunities": len(opportunities)
+        "players_eligible": len(eligible),
+        "profitable_opportunities": len(opportunities),
     }

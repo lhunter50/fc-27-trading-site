@@ -1,4 +1,5 @@
 import type { Player } from '../../types/player'
+import { getPriceChange } from '../../utils/player'
 
 type SortKey = 'name' | 'current_price' | 'average_price' | 'price_change'
 
@@ -43,31 +44,47 @@ export function PlayerTable({
           </tr>
         </thead>
 
+
         <tbody className="divide-y divide-slate-800">
-          {players.map((player) => (
-            <tr key={player.player_id} className="hover:bg-slate-800/50">
-              <td className="px-5 py-4 font-medium text-white">{player.name}</td>
-              <td className="px-5 py-4 capitalize text-slate-400">
-                {player.category.replace('_', ' ')}
-              </td>
-              <td className="px-5 py-4">{player.current_price.toLocaleString()}</td>
-              <td className="px-5 py-4">{player.average_price.toLocaleString()}</td>
-              <td className={`px-5 py-4 font-medium ${
-                player.price_change === null
-                  ? 'text-slate-500'
-                  : player.price_change > 0
-                    ? 'text-emerald-400'
-                    : player.price_change < 0
-                      ? 'text-red-400'
-                      : 'text-slate-400'
-              }`}>
-                {player.price_change === null
-                  ? 'N/A'
-                  : `${player.price_change > 0 ? '+' : ''}${player.price_change}%`}
-              </td>
-            </tr>
-          ))}
+          {players.map((player) => {
+            const priceChange = getPriceChange(player)
+
+            return (
+              <tr key={player.player_id} className="hover:bg-slate-800/50">
+                <td className="px-5 py-4 font-medium text-white">
+                  {player.name}
+                </td>
+
+                <td className="px-5 py-4 capitalize text-slate-400">
+                  {player.category.replace('_', ' ')}
+                </td>
+
+                <td className="px-5 py-4">
+                  {player.current_price.toLocaleString()}
+                </td>
+
+                <td className="px-5 py-4">
+                  {player.average_price.toLocaleString()}
+                </td>
+
+                <td className={`px-5 py-4 font-medium ${
+                  priceChange === null
+                    ? 'text-slate-500'
+                    : priceChange > 0
+                      ? 'text-emerald-400'
+                      : priceChange < 0
+                        ? 'text-red-400'
+                        : 'text-slate-400'
+                }`}>
+                  {priceChange === null
+                    ? 'N/A'
+                    : `${priceChange > 0 ? '+' : ''}${priceChange.toFixed(2)}%`}
+                </td>
+              </tr>
+            )
+          })}
         </tbody>
+
       </table>
 
       {players.length === 0 && (

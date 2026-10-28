@@ -1,4 +1,6 @@
 import { useMemo, useState } from 'react'
+
+import { getPriceChange } from '../utils/player'
 import type { Player } from '../types/player'
 
 type SortKey = 'name' | 'current_price' | 'average_price' | 'price_change'
@@ -31,23 +33,33 @@ export function useMarketFilters(players: Player[]) {
       return matchesSearch && matchesCategory
     })
 
+
     return filtered.sort((a, b) => {
       if (sortKey === 'name') {
         const comparison = a.name.localeCompare(b.name)
         return sortDirection === 'asc' ? comparison : -comparison
       }
 
-      const aValue = a[sortKey]
-      const bValue = b[sortKey]
+      const aValue =
+        sortKey === 'price_change'
+          ? getPriceChange(a)
+          : a[sortKey]
 
-      if (aValue === null) return 1
-      if (bValue === null) return -1
+      const bValue =
+        sortKey === 'price_change'
+          ? getPriceChange(b)
+          : b[sortKey]
+
+      if (aValue == null && bValue == null) return 0
+      if (aValue == null) return 1
+      if (bValue == null) return -1
 
       return sortDirection === 'asc'
         ? aValue - bValue
         : bValue - aValue
     })
-  }, [players, search, category, sortKey, sortDirection])
+    }, [players, search, category, sortKey, sortDirection])
+
 
   return {
     search,

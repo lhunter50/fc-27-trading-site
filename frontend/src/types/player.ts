@@ -3,7 +3,7 @@ export interface Player {
     name: string
     current_price: number
     average_price: number
-    price_change: number | null
+    price_change?: number | null
     category: string
     observations: number
 }
