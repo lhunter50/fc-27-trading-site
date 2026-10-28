@@ -4,3 +4,9 @@ export interface ScannerSummary {
     rejected_after_tax: number
     profitable_opportunities: number
 }
+
+export interface FutggScannerSummary {
+    players_analyzed: number
+    players_eligible: number
+    profitable_opportunities: number
+}

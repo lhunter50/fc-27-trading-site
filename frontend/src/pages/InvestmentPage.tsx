@@ -1,5 +1,5 @@
-import { useState } from 'react'
 
+import { useState } from 'react'
 import type { MarketSource } from '../services/api'
 
 import { OpportunityTable } from '../components/investments/OpportunityTable'
@@ -8,9 +8,16 @@ import { ScannerSummary } from '../components/investments/ScannerSummary'
 import { useScannerSummary } from '../hooks/useScannerSummary'
 
 export function InvestmentsPage() {
-  const [source, setSource ] = useState<MarketSource>('futgg')
+  const [source, setSource] = useState<MarketSource>('futgg')
+
   const { opportunities, loading, error } = useOpportunities(source)
-  const { summary, loading: scannerLoading, error: scannerError } = useScannerSummary()
+
+  const {
+    summary,
+    loading: scannerLoading,
+    error: scannerError,
+  } = useScannerSummary(source)
+
   return (
     <div className="space-y-8">
       <div>
@@ -22,6 +29,7 @@ export function InvestmentsPage() {
           Players currently priced below their historical averages.
         </p>
       </div>
+
       <div className="flex gap-2">
         {(['futgg', 'original'] as const).map((option) => (
           <button
@@ -39,21 +47,52 @@ export function InvestmentsPage() {
         ))}
       </div>
 
-      {scannerLoading && <p>Scanning market opportunities...</p>}
-
-      {scannerError && <p className="text-red-400">Error: {scannerError}</p>}
-
-      {!scannerLoading && !scannerError && summary && (
-        <ScannerSummary summary={summary} />
+      {scannerLoading && (
+        <p className="text-slate-400">Loading scanner summary...</p>
       )}
 
-      {loading && <p>Scanning market opportunities...</p>}
+      {scannerError && (
+        <p className="text-red-400">Error: {scannerError}</p>
+      )}
 
-      {error && <p className="text-red-400">Error: {error}</p>}
+      {!scannerLoading && !scannerError && summary && (
+        source === 'original' ? (
+          'below_average' in summary && (
+            <ScannerSummary summary={summary} />
+          )
+        ) : (
+          'players_eligible' in summary && (
+            <div className="grid gap-4 md:grid-cols-3">
+              {[
+                ['Players Analyzed', summary.players_analyzed],
+                ['Players Eligible (3+ observations)', summary.players_eligible],
+                ['Profitable Opportunities', summary.profitable_opportunities],
+              ].map(([label, value]) => (
+                <div
+                  key={label}
+                  className="rounded-xl border border-slate-800 bg-slate-900 p-6"
+                >
+                  <p className="text-sm text-slate-400">{label}</p>
+                  <p className="mt-2 text-3xl font-bold text-white">
+                    {value.toLocaleString()}
+                  </p>
+                </div>
+              ))}
+            </div>
+          )
+        )
+      )}
+
+      {loading && (
+        <p className="text-slate-400">Scanning market opportunities...</p>
+      )}
+
+      {error && (
+        <p className="text-red-400">Error: {error}</p>
+      )}
 
       {!loading && !error && (
         <>
-
           <OpportunityTable opportunities={opportunities} />
 
           <p className="text-xs text-slate-500">

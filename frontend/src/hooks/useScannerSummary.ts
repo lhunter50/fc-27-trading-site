@@ -1,36 +1,56 @@
-import {useEffect, useState} from "react";
-import {fetchScannerSummary} from "../services/api";
-import type {ScannerSummary} from "../types/scanner";
+import { useEffect, useState } from "react"
+import { fetchScannerSummary } from "../services/api"
+import type { MarketSource } from "../services/api"
+import type {
+    ScannerSummary,
+    FutggScannerSummary
+} from "../types/scanner"
 
-export function useScannerSummary() {
-    const [summary, setSummary] = useState<ScannerSummary | null>(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+export function useScannerSummary(
+    source: MarketSource = "original"
+) {
+    const [summary, setSummary] = useState<
+        ScannerSummary | FutggScannerSummary | null
+    >(null)
+
+    const [loading, setLoading] = useState(true)
+    const [error, setError] = useState<string | null>(null)
 
     useEffect(() => {
-        let cancelled = false;
+        let cancelled = false
 
         async function loadSummary() {
+            setLoading(true)
+            setError(null)
+            setSummary(null)
+
             try {
-                const data = await fetchScannerSummary();
+                const data = await fetchScannerSummary(source)
+
                 if (!cancelled) {
-                    setSummary(data);
-                    setLoading(false);
+                    setSummary(data)
                 }
             } catch (err) {
                 if (!cancelled) {
-                    setError((err as Error).message);
-                    setLoading(false);
+                    setError(
+                        err instanceof Error
+                            ? err.message
+                            : "Unknown error"
+                    )
+                }
+            } finally {
+                if (!cancelled) {
+                    setLoading(false)
                 }
             }
         }
 
-        loadSummary();
+        loadSummary()
 
         return () => {
-            cancelled = true;
-        };
-    }, []);
+            cancelled = true
+        }
+    }, [source])
 
-    return { summary, loading, error };
+    return { summary, loading, error }
 }
